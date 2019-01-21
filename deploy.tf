@@ -108,7 +108,7 @@ resource "openstack_compute_instance_v2" "rhcsa_server" {
     port = "${openstack_networking_port_v2.port_1.id}"
     
   }
-  #user_data = "${file("controller.sh")}"
+  user_data = "${file("node.sh")}"
   
 }
 
@@ -128,7 +128,7 @@ key_pair        = "bryce"
   network {
     port = "${openstack_networking_port_v2.port_2.id}"
   }
-  #user_data = "${file("node.sh")}"
+  user_data = "${file("node.sh")}"
 }
 
 ##----------------------------< floating ip create -1 >----------------------------##
