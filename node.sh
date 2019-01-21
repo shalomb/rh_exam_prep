@@ -2,7 +2,7 @@
 
 yum -y update
 yum -y install epel-release
-
+yum -y install vim
 
 cat <<EOF > /home/centos/.vimrc
 autocmd FileType yaml setlocal ai ts=2 sw=2 et
