@@ -113,48 +113,13 @@ resource "openstack_compute_secgroup_v2" "rabbit_secgroup" {
     ip_protocol = "tcp"
     cidr        = "37.26.88.0/24"
   }
-  rule {
-    from_port   = 4369
-    to_port     = 4369
-    ip_protocol = "tcp"
-    cidr        = "37.26.92.0/24"
-  }
-    rule {
-    from_port   = 25672
-    to_port     = 25672
-    ip_protocol = "tcp"
-    cidr        = "37.26.92.0/24"
-  }
-    rule {
-    from_port   = 5671
-    to_port     = 5672
-    ip_protocol = "tcp"
-    cidr        = "37.26.92.0/24"
-  }
-    rule {
+      rule {
     from_port   = 15672
     to_port     = 15672
     ip_protocol = "tcp"
     cidr        = "37.26.92.0/24"
   }
-    rule {
-    from_port   = 61613
-    to_port     = 61614
-    ip_protocol = "tcp"
-    cidr        = "37.26.92.0/24"
-  }
-    rule {
-    from_port   = 1883
-    to_port     = 1883
-    ip_protocol = "tcp"
-    cidr        = "37.26.92.0/24"
-  }
-    rule {
-    from_port   = 8883
-    to_port     = 8883
-    ip_protocol = "tcp"
-    cidr        = "37.26.92.0/24"
-  }
+    
     rule {
     from_port   = 15672
     to_port     = 15672
