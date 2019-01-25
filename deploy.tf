@@ -90,15 +90,86 @@ resource "openstack_compute_secgroup_v2" "rhcsa_secgroup" {
     cidr        = "37.26.88.73/32"
     }
 }
+##----------------------------< Create a rabbit security group >----------------------------##
+resource "openstack_compute_secgroup_v2" "rabbit_secgroup" {
+  name        = "rabbit_secgroup"
+  description = "Allow web traffic inbound"
 
+  rule {
+    from_port   = 22
+    to_port     = 22
+    ip_protocol = "tcp"
+    cidr        = "37.26.92.0/24"
+  }
+    rule {
+    from_port   = 22
+    to_port     = 22
+    ip_protocol = "tcp"
+    cidr        = "212.159.77.225/32"
+  }
+      rule {
+    from_port   = 22
+    to_port     = 22
+    ip_protocol = "tcp"
+    cidr        = "37.26.88.0/24"
+  }
+  rule {
+    from_port   = 4369
+    to_port     = 4369
+    ip_protocol = "tcp"
+    cidr        = "37.26.92.0/24"
+  }
+    rule {
+    from_port   = 25672
+    to_port     = 25672
+    ip_protocol = "tcp"
+    cidr        = "37.26.92.0/24"
+  }
+    rule {
+    from_port   = 5671
+    to_port     = 5672
+    ip_protocol = "tcp"
+    cidr        = "37.26.92.0/24"
+  }
+    rule {
+    from_port   = 15672
+    to_port     = 15672
+    ip_protocol = "tcp"
+    cidr        = "37.26.92.0/24"
+  }
+    rule {
+    from_port   = 61613
+    to_port     = 61614
+    ip_protocol = "tcp"
+    cidr        = "37.26.92.0/24"
+  }
+    rule {
+    from_port   = 1883
+    to_port     = 1883
+    ip_protocol = "tcp"
+    cidr        = "37.26.92.0/24"
+  }
+    rule {
+    from_port   = 8883
+    to_port     = 8883
+    ip_protocol = "tcp"
+    cidr        = "37.26.92.0/24"
+  }
+    rule {
+    from_port   = 15672
+    to_port     = 15672
+    ip_protocol = "tcp"
+    cidr        = "212.159.77.225/32"
+  } 
+}
 ##----------------------------< instance  rhcsa_server create >----------------------------##
 resource "openstack_compute_instance_v2" "rhcsa_server" {
   name      = "rhcsa_server"
-  image_id  = "c09aceb5-edad-4392-bc78-197162847dd1"
+  image_id  = "073743b4-2eb1-479e-8a30-e480de174141"
   flavor_id = "c46be6d1-979d-4489-8ffe-e421a3c83fdd"
 
   key_pair        = "bryce"
-  security_groups = ["${openstack_compute_secgroup_v2.rhcsa_secgroup.name}"]
+  security_groups = ["${openstack_compute_secgroup_v2.rabbit_secgroup.name}"]
 
   metadata {
     this = "rhcsa_server"
@@ -108,18 +179,18 @@ resource "openstack_compute_instance_v2" "rhcsa_server" {
     port = "${openstack_networking_port_v2.port_1.id}"
     
   }
-  user_data = "${file("node.sh")}"
+  user_data = "${file("rabbit.sh")}"
   
 }
 
 ##----------------------------< rhcsa_client create >----------------------------##
 resource "openstack_compute_instance_v2" "rhcsa_client" {
   name      = "rhcsa_client"
-  image_id  = "c09aceb5-edad-4392-bc78-197162847dd1"
+  image_id  = "073743b4-2eb1-479e-8a30-e480de174141"
   flavor_id = "c46be6d1-979d-4489-8ffe-e421a3c83fdd"
 
 key_pair        = "bryce"
-  security_groups = ["${openstack_compute_secgroup_v2.rhcsa_secgroup.name}"]
+security_groups = ["${openstack_compute_secgroup_v2.rabbit_secgroup.name}"]
 
   metadata {
     this = "node1"
