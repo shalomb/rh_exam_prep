@@ -13,14 +13,14 @@ resource "openstack_networking_subnet_v2" "rhcsa_subnet" {
   network_id = "${openstack_networking_network_v2.rhcsa_net.id}"
   cidr       = "10.1.10.0/24"
   ip_version = 4
-  dns_nameservers = ["1.1.1.1"]
+  dns_nameservers = "${module.ci-env.dc-dns-nameservers}"
 }
 
 ##----------------------------< router create >----------------------------##
 resource "openstack_networking_router_v2" "R-RHCSA" {
   name                = "R-RHCSA"
   admin_state_up      = true
-  external_network_id = "893a5b59-081a-4e3a-ac50-1e54e262c3fa"
+  external_network_id = "${module.ci-env.dc-ext-net-id}"
 }
 
 ##----------------------------< attach R-RHCSA to rhcsa_net >----------------------------##
@@ -35,7 +35,7 @@ resource "openstack_networking_port_v2" "port_1" {
   network_id         = "${openstack_networking_network_v2.rhcsa_net.id}"
   admin_state_up     = "true"
   security_group_ids = ["${openstack_compute_secgroup_v2.rhcsa_secgroup.id}"]
-  
+
   fixed_ip {
     "subnet_id"  = "${openstack_networking_subnet_v2.rhcsa_subnet.id}"
     "ip_address" = "10.1.10.11"
@@ -63,33 +63,39 @@ resource "openstack_compute_secgroup_v2" "rhcsa_secgroup" {
     from_port   = 22
     to_port     = 22
     ip_protocol = "tcp"
-    cidr        = "37.26.92.83/32"
+    cidr        = "${module.ci-env.dc-egress-18}"
   }
-    rule {
+
+  rule {
     from_port   = 22
     to_port     = 22
     ip_protocol = "tcp"
-    cidr        = "212.159.77.225/32"
+    cidr        = "${module.ci-env.dc-egress-18}"
   }
-    rule {
+
+  rule {
     from_port   = 22
     to_port     = 22
     ip_protocol = "tcp"
     cidr        = "37.26.92.93/32"
+    cidr        = "${module.ci-env.dc-egress-137}"
   }
-      rule {
+
+  rule {
     from_port   = 22
     to_port     = 22
     ip_protocol = "tcp"
-    cidr        = "37.26.88.93/32"
+    cidr        = "${module.ci-env.dc-egress-4}"
   }
-    rule {
+
+  rule {
     from_port   = 22
     to_port     = 22
     ip_protocol = "tcp"
-    cidr        = "37.26.88.73/32"
-    }
+    cidr        = "${module.ci-env.dc-egress-16}"
+  }
 }
+
 ##----------------------------< Create a rabbit security group >----------------------------##
 resource "openstack_compute_secgroup_v2" "rabbit_secgroup" {
   name        = "rabbit_secgroup"
@@ -99,39 +105,43 @@ resource "openstack_compute_secgroup_v2" "rabbit_secgroup" {
     from_port   = 22
     to_port     = 22
     ip_protocol = "tcp"
-    cidr        = "37.26.92.0/24"
+    cidr        = "${module.ci-env.dc-egress-10}"
   }
-    rule {
+
+  rule {
     from_port   = 22
     to_port     = 22
     ip_protocol = "tcp"
-    cidr        = "212.159.77.225/32"
+    cidr        = "${module.ci-env.dc-egress-18}"
   }
-      rule {
+
+  rule {
     from_port   = 22
     to_port     = 22
     ip_protocol = "tcp"
-    cidr        = "37.26.88.0/24"
+    cidr        = "${module.ci-env.dc-egress-12}"
   }
-      rule {
+
+  rule {
     from_port   = 15672
     to_port     = 15672
     ip_protocol = "tcp"
-    cidr        = "37.26.92.0/24"
+    cidr        = "${module.ci-env.dc-egress-189}"
   }
-    
-    rule {
+
+  rule {
     from_port   = 15672
     to_port     = 15672
     ip_protocol = "tcp"
-    cidr        = "212.159.77.225/32"
-  } 
+    cidr        = "${module.ci-env.dc-egress-108}"
+  }
+
 }
 ##----------------------------< instance  rhcsa_server create >----------------------------##
 resource "openstack_compute_instance_v2" "rhcsa_server" {
   name      = "rhcsa_server"
-  image_id  = "073743b4-2eb1-479e-8a30-e480de174141"
-  flavor_id = "c46be6d1-979d-4489-8ffe-e421a3c83fdd"
+  image_id  = "${module.ci-env.ubuntu-xenial}"
+  flavor_id = "${module.ci-env.x1-small}"
 
   key_pair        = "bryce"
   security_groups = ["${openstack_compute_secgroup_v2.rabbit_secgroup.name}"]
@@ -142,20 +152,20 @@ resource "openstack_compute_instance_v2" "rhcsa_server" {
 
   network {
     port = "${openstack_networking_port_v2.port_1.id}"
-    
+
   }
   user_data = "${file("rabbit.sh")}"
-  
+
 }
 
 ##----------------------------< rhcsa_client create >----------------------------##
 resource "openstack_compute_instance_v2" "rhcsa_client" {
   name      = "rhcsa_client"
-  image_id  = "073743b4-2eb1-479e-8a30-e480de174141"
-  flavor_id = "c46be6d1-979d-4489-8ffe-e421a3c83fdd"
+  image_id  = "${module.ci-env.ubuntu-xenial}"
+  flavor_id = "${module.ci-env.x1-small}"
 
-key_pair        = "bryce"
-security_groups = ["${openstack_compute_secgroup_v2.rabbit_secgroup.name}"]
+  key_pair        = "${module.ci-env.keypair}"
+  security_groups = ["${openstack_compute_secgroup_v2.rabbit_secgroup.name}"]
 
   metadata {
     this = "node1"
