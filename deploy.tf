@@ -87,7 +87,7 @@ resource "openstack_compute_instance_v2" "rhcsa_server" {
   network {
     port = "${openstack_networking_port_v2.port_1.id}"
   }
-  user_data = "${file("rabbit.sh")}"
+  user_data = "${data.template_cloudinit_config.config.rendered}"
 }
 ##----------------------------< rabbit create >----------------------------##
 resource "openstack_compute_instance_v2" "rabbit_server" {
@@ -102,7 +102,7 @@ resource "openstack_compute_instance_v2" "rabbit_server" {
   network {
     port = "${openstack_networking_port_v2.port_2.id}"
   }
-  user_data = "${file("node.sh")}"
+  user_data = "${data.template_cloudinit_config.config.rendered}"
 }
 ##----------------------------< floating ip create -1 >----------------------------##
 resource "openstack_networking_floatingip_v2" "floatip_1" {
