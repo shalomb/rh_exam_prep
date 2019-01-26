@@ -63,84 +63,53 @@ resource "openstack_compute_secgroup_v2" "rhcsa_secgroup" {
     from_port   = 22
     to_port     = 22
     ip_protocol = "tcp"
-    cidr        = "${module.ci-env.dc-egress-18}"
+    cidr        = "${module.ci-env.dc-ingress-1}"
   }
 
   rule {
     from_port   = 22
     to_port     = 22
     ip_protocol = "tcp"
-    cidr        = "${module.ci-env.dc-egress-18}"
-  }
-
-  rule {
-    from_port   = 22
-    to_port     = 22
-    ip_protocol = "tcp"
-    cidr        = "37.26.92.93/32"
-    cidr        = "${module.ci-env.dc-egress-137}"
-  }
-
-  rule {
-    from_port   = 22
-    to_port     = 22
-    ip_protocol = "tcp"
-    cidr        = "${module.ci-env.dc-egress-4}"
-  }
-
-  rule {
-    from_port   = 22
-    to_port     = 22
-    ip_protocol = "tcp"
-    cidr        = "${module.ci-env.dc-egress-16}"
+    cidr        = "${module.ci-env.dc-ingress-2}"
   }
 }
-
 ##----------------------------< Create a rabbit security group >----------------------------##
 resource "openstack_compute_secgroup_v2" "rabbit_secgroup" {
   name        = "rabbit_secgroup"
-  description = "Allow web traffic inbound"
+  description = "Allow access to rabbitmq"
 
   rule {
     from_port   = 22
     to_port     = 22
     ip_protocol = "tcp"
-    cidr        = "${module.ci-env.dc-egress-10}"
+    cidr        = "${module.ci-env.dc-ingress-1}"
   }
 
   rule {
     from_port   = 22
     to_port     = 22
     ip_protocol = "tcp"
-    cidr        = "${module.ci-env.dc-egress-18}"
+    cidr        = "${module.ci-env.dc-ingress-2}"
   }
-
   rule {
-    from_port   = 22
-    to_port     = 22
+    from_port   = 15672
+    to_port     = 15672
     ip_protocol = "tcp"
-    cidr        = "${module.ci-env.dc-egress-12}"
+    cidr        = "${module.ci-env.dc-ingress-1}"
   }
 
   rule {
     from_port   = 15672
     to_port     = 15672
     ip_protocol = "tcp"
-    cidr        = "${module.ci-env.dc-egress-189}"
-  }
-
-  rule {
-    from_port   = 15672
-    to_port     = 15672
-    ip_protocol = "tcp"
-    cidr        = "${module.ci-env.dc-egress-108}"
+    cidr        = "${module.ci-env.dc-ingress-2}"
   }
 
 }
 ##----------------------------< instance  rhcsa_server create >----------------------------##
 resource "openstack_compute_instance_v2" "rhcsa_server" {
   name      = "rhcsa_server"
-  image_id  = "${module.ci-env.ubuntu-xenial}"
+  image_id  = "${module.ci-env.centos-latest}"
   flavor_id = "${module.ci-env.x1-small}"
 
   key_pair        = "bryce"
@@ -161,7 +130,7 @@ resource "openstack_compute_instance_v2" "rhcsa_server" {
 ##----------------------------< rhcsa_client create >----------------------------##
 resource "openstack_compute_instance_v2" "rhcsa_client" {
   name      = "rhcsa_client"
-  image_id  = "${module.ci-env.ubuntu-xenial}"
+  image_id  = "${module.ci-env.centos-latest}"
   flavor_id = "${module.ci-env.x1-small}"
 
   key_pair        = "${module.ci-env.keypair}"
