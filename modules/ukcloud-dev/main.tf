@@ -31,6 +31,9 @@ output "centos-latest" {
   # or better get this out of OS directly
   # value = "${data.openstack_images_image_v2.xenial.id}"
 }
+output "centos-rabbit" {
+  value = "c2908c77-4ad1-4c8a-b22c-ee6c0a42904f"
+}
 
 output "x1-small" {
   value = "c46be6d1-979d-4489-8ffe-e421a3c83fdd"

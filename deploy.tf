@@ -34,7 +34,7 @@ resource "openstack_networking_port_v2" "port_1" {
   name               = "port_1"
   network_id         = "${openstack_networking_network_v2.rhcsa_net.id}"
   admin_state_up     = "true"
-  security_group_ids = ["${openstack_compute_secgroup_v2.rhcsa_secgroup.id}"]
+  security_group_ids = ["${openstack_compute_secgroup_v2.rabbit_secgroup.id}"]
 
   fixed_ip {
     "subnet_id"  = "${openstack_networking_subnet_v2.rhcsa_subnet.id}"
@@ -46,7 +46,7 @@ resource "openstack_networking_port_v2" "port_2" {
   name               = "port_2"
   network_id         = "${openstack_networking_network_v2.rhcsa_net.id}"
   admin_state_up     = "true"
-  security_group_ids = ["${openstack_compute_secgroup_v2.rhcsa_secgroup.id}"]
+  security_group_ids = ["${openstack_compute_secgroup_v2.rabbit_secgroup.id}"]
 
   fixed_ip {
     "subnet_id"  = "${openstack_networking_subnet_v2.rhcsa_subnet.id}"
@@ -54,25 +54,6 @@ resource "openstack_networking_port_v2" "port_2" {
   }
 }
 
-##----------------------------< Create a security group >----------------------------##
-resource "openstack_compute_secgroup_v2" "rhcsa_secgroup" {
-  name        = "rhcsa_secgroup"
-  description = "Allow web traffic inbound"
-
-  rule {
-    from_port   = 22
-    to_port     = 22
-    ip_protocol = "tcp"
-    cidr        = "${module.ci-env.dc-ingress-1}"
-  }
-
-  rule {
-    from_port   = 22
-    to_port     = 22
-    ip_protocol = "tcp"
-    cidr        = "${module.ci-env.dc-ingress-2}"
-  }
-}
 ##----------------------------< Create a rabbit security group >----------------------------##
 resource "openstack_compute_secgroup_v2" "rabbit_secgroup" {
   name        = "rabbit_secgroup"
@@ -127,10 +108,10 @@ resource "openstack_compute_instance_v2" "rhcsa_server" {
 
 }
 
-##----------------------------< rhcsa_client create >----------------------------##
-resource "openstack_compute_instance_v2" "rhcsa_client" {
-  name      = "rhcsa_client"
-  image_id  = "${module.ci-env.centos-latest}"
+##----------------------------< rabbit create >----------------------------##
+resource "openstack_compute_instance_v2" "rabbit_server" {
+  name      = "rabbit_server"
+  image_id  = "${module.ci-env.centos-rabbit}"
   flavor_id = "${module.ci-env.x1-small}"
 
   key_pair        = "${module.ci-env.keypair}"
@@ -156,3 +137,12 @@ resource "openstack_compute_floatingip_associate_v2" "floatip_1" {
   instance_id = "${openstack_compute_instance_v2.rhcsa_server.id}"
 }
 
+##----------------------------< floating ip create -2 >----------------------------##
+resource "openstack_networking_floatingip_v2" "floatip_2" {
+  pool = "internet"
+}
+
+resource "openstack_compute_floatingip_associate_v2" "floatip_2" {
+  floating_ip = "${openstack_networking_floatingip_v2.floatip_2.address}"
+  instance_id = "${openstack_compute_instance_v2.rabbit_server.id}"
+}
